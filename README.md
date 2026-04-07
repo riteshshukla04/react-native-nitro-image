@@ -89,13 +89,16 @@ const symbolImage   = Images.loadFromSymbol('star')
 Additionally, you can also create a new blank Image:
 
 ```ts
-const blank = Images.createBlankImage(100, 100, true)
+const blank = Images.createBlankImage(100, 100, /*enableAlpha:*/ true)
 ```
 
 If you want to fill the blank image with a specific background color, pass the color in RGB:
 
 ```ts
-const blankRedImage = Images.createBlankImage(100, 100, true, { r: 1, g: 0, b: 0 })
+const blankRedImage = Images.createBlankImage(100,
+                                              100,
+                                              /*enableAlpha:*/ true,
+                                              { r: 1, g: 0, b: 0 })
 ```
 
 #### Load with Options
@@ -169,6 +172,15 @@ An `Image` can be rotated entirely in-memory, without ever writing to- or readin
 ```ts
 const webImage   = await WebImages.loadFromURLAsync('https://picsum.photos/seed/123/400')
 const upsideDown = await webImage.rotateAsync(180)
+```
+
+#### Mirroring
+
+An `Image` can be mirrored horizontally (left <-> right) entirely in-memory, without ever writing to- or reading from- a file:
+
+```ts
+const webImage = await WebImages.loadFromURLAsync('https://picsum.photos/seed/123/400')
+const mirrored = await webImage.mirrorHorizontallyAsync()
 ```
 
 #### Render into another Image

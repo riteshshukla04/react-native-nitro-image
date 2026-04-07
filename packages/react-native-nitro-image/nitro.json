@@ -1,30 +1,54 @@
 {
-    "$schema": "https://nitro.margelo.com/nitro.schema.json",
-    "cxxNamespace": ["image"],
-    "ios": {
-        "iosModuleName": "NitroImage"
+  "$schema": "https://nitro.margelo.com/nitro.schema.json",
+  "cxxNamespace": ["image"],
+  "ios": {
+    "iosModuleName": "NitroImage"
+  },
+  "android": {
+    "androidNamespace": ["image"],
+    "androidCxxLibName": "NitroImage"
+  },
+  "autolinking": {
+    "ImageFactory": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridImageFactory"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "HybridImageFactory"
+      }
     },
-    "android": {
-        "androidNamespace": ["image"],
-        "androidCxxLibName": "NitroImage"
+    "ImageLoaderFactory": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridImageLoaderFactory"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "HybridImageLoaderFactory"
+      }
     },
-    "autolinking": {
-        "ImageFactory": {
-            "swift": "HybridImageFactory",
-            "kotlin": "HybridImageFactory"
-        },
-        "ImageLoaderFactory": {
-            "swift": "HybridImageLoaderFactory",
-            "kotlin": "HybridImageLoaderFactory"
-        },
-        "ImageUtils": {
-            "swift": "HybridImageUtils",
-            "kotlin": "HybridImageUtils"
-        },
-        "NitroImageView": {
-            "swift": "HybridImageView",
-            "kotlin": "HybridImageView"
-        }
+    "ImageUtils": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridImageUtils"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "HybridImageUtils"
+      }
     },
-    "ignorePaths": ["**/node_modules"]
+    "NitroImageView": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridImageView"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "HybridImageView"
+      }
+    }
+  },
+  "ignorePaths": ["**/node_modules"]
 }

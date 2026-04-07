@@ -1,6 +1,6 @@
 //
 //  HybridImageLoader.swift
-//  Pods
+//  NitroImage
 //
 //  Created by Marc Rousavy on 25.07.25.
 //
@@ -9,63 +9,52 @@ import NitroModules
 
 class HybridImageLoader: HybridImageLoaderSpec {
   typealias LoadFunc = () throws -> Promise<any HybridImageSpec>
-  typealias RequestFunc = (_ for: any HybridNitroImageViewSpec) throws -> Void
-  typealias DropFunc = (_ for: any HybridNitroImageViewSpec) throws -> Void
-  
-  private let load: LoadFunc
-  private let requestImage: RequestFunc
-  private let dropImage: DropFunc
-  
-  init(load: @escaping LoadFunc) {
-    self.load = load
-    self.requestImage = Self.defaultRequestFunc(forLoadFunc: load)
-    self.dropImage = Self.defaultDropFunc()
-  }
-  init(load: @escaping LoadFunc,
-       requestImage: @escaping RequestFunc,
-       dropImage: @escaping DropFunc) {
-    self.load = load
-    self.requestImage = requestImage
-    self.dropImage = dropImage
-  }
-  
-  func loadImage() throws -> Promise<any HybridImageSpec> {
-    return try load()
-  }
-  
-  func requestImage(forView view: any HybridNitroImageViewSpec) throws {
-    return try requestImage(view)
-  }
-  
-  func dropImage(forView view: any HybridNitroImageViewSpec) throws {
-    return try dropImage(view)
-  }
-}
 
-fileprivate extension HybridImageLoader {
-  static func defaultRequestFunc(forLoadFunc loadFunc: @escaping LoadFunc) -> RequestFunc {
-    return { view in
-      guard let view = view as? NativeImageView else { return }
-      let promise = try loadFunc()
-      promise.then { image in
+  private let load: LoadFunc
+  private let allowCaching: Bool
+  private var cachedResult: (any HybridImageSpec)? = nil
+
+  init(load: @escaping LoadFunc, allowCaching: Bool = true) {
+    self.load = load
+    self.allowCaching = allowCaching
+  }
+
+  func dispose() {
+    self.cachedResult = nil
+  }
+
+  func loadImage() throws -> Promise<any HybridImageSpec> {
+    if allowCaching {
+      // We can cache the last loaded image in state, so future requests receive it instantly
+      if let cachedResult {
+        return .resolved(withResult: cachedResult)
+      }
+      return try load()
+        .then { [weak self] image in
+          guard let self else { return }
+          self.cachedResult = image
+        }
+    } else {
+      // We need to reload the Image each time.
+      return try load()
+    }
+  }
+
+  func requestImage(forView view: any HybridNitroImageViewSpec) throws {
+    guard let view = view as? NativeImageView else { return }
+    try loadImage()
+      .then { image in
         guard let image = image as? NativeImage else { return }
-        Task { @MainActor in
+        DispatchQueue.runOnMain {
           view.imageView.image = image.uiImage
         }
       }
-      promise.catch { _ in
-        Task { @MainActor in
-          view.imageView.image = nil
-        }
-      }
-    }
   }
-  static func defaultDropFunc() -> DropFunc {
-    return { view in
-      guard let view = view as? NativeImageView else { return }
-      Task { @MainActor in
-        view.imageView.image = nil
-      }
+
+  func dropImage(forView view: any HybridNitroImageViewSpec) throws {
+    guard let view = view as? NativeImageView else { return }
+    DispatchQueue.runOnMain {
+      view.imageView.image = nil
     }
   }
 }

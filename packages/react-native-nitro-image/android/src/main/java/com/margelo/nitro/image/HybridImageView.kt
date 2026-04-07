@@ -5,19 +5,20 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import androidx.annotation.Keep
-import androidx.core.view.isVisible
 import com.facebook.common.internal.DoNotStrip
+import com.margelo.nitro.image.utils.CustomImageView
+import com.margelo.nitro.views.RecyclableView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @DoNotStrip
 @Keep
-class HybridImageView(context: Context): HybridNitroImageViewSpec() {
+class HybridImageView(context: Context): HybridNitroImageViewSpec(), RecyclableView {
     companion object {
         private const val TAG = "HybridImageView"
     }
-    private val uiScope = CoroutineScope(Dispatchers.Main)
+    private val uiScope = CoroutineScope(Dispatchers.Main.immediate)
     private var resetImageBeforeLoad = false
 
     val imageView = CustomImageView(context) { visible ->
@@ -48,6 +49,11 @@ class HybridImageView(context: Context): HybridNitroImageViewSpec() {
             field = value
         }
 
+    override fun prepareForRecycle() {
+        onDisappear()
+        imageView.setImageBitmap(null)
+    }
+
     private fun updateResizeMode() {
         imageView.scaleType = when (resizeMode) {
             ResizeMode.COVER -> ImageView.ScaleType.CENTER_CROP
@@ -60,7 +66,7 @@ class HybridImageView(context: Context): HybridNitroImageViewSpec() {
 
     private fun updateImage() {
         image?.match(
-            { actualImage ->
+            { actualImage: HybridImageSpec ->
                 // Image
                 if (actualImage is HybridImage) {
                     imageView.setImageBitmap(actualImage.bitmap)
@@ -68,7 +74,7 @@ class HybridImageView(context: Context): HybridNitroImageViewSpec() {
                     throw Error("Image is a different type than HybridImage!")
                 }
             },
-            { imageLoader ->
+            { _: HybridImageLoaderSpec ->
                 // ImageLoader
                 onAppear()
             }

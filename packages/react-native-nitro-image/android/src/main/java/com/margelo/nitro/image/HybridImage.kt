@@ -12,6 +12,13 @@ import com.facebook.proguard.annotations.DoNotStrip
 import com.madebyevan.thumbhash.ThumbHash
 import com.margelo.nitro.core.ArrayBuffer
 import com.margelo.nitro.core.Promise
+import com.margelo.nitro.image.extensions.compressInMemory
+import com.margelo.nitro.image.extensions.isGPU
+import com.margelo.nitro.image.extensions.pixelFormat
+import com.margelo.nitro.image.extensions.saveToFile
+import com.margelo.nitro.image.extensions.toByteBuffer
+import com.margelo.nitro.image.extensions.toCpuAccessible
+import com.margelo.nitro.image.extensions.toMutable
 import java.io.File
 import java.nio.ByteBuffer
 
@@ -132,6 +139,18 @@ class HybridImage: HybridImageSpec {
         endY: Double
     ): Promise<HybridImageSpec> {
         return Promise.async { crop(startX, startY, endX, endY) }
+    }
+
+    override fun mirrorHorizontally(): HybridImageSpec {
+        val matrix = Matrix().apply {
+            preScale(-1f, 1f)
+        }
+        val mirrored = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, false)
+        return HybridImage(mirrored)
+    }
+
+    override fun mirrorHorizontallyAsync(): Promise<HybridImageSpec> {
+        return Promise.async { mirrorHorizontally() }
     }
 
     override fun saveToFileAsync(

@@ -11,6 +11,8 @@ import com.madebyevan.thumbhash.ThumbHash
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.ArrayBuffer
 import com.margelo.nitro.core.Promise
+import com.margelo.nitro.image.extensions.bitmapFromRawPixelData
+import com.margelo.nitro.image.extensions.toBitmapColor
 import java.nio.ByteBuffer
 
 @DoNotStrip
@@ -67,7 +69,7 @@ class HybridImageFactory: HybridImageFactorySpec() {
         return HybridImage(bitmap)
     }
     override fun loadFromRawPixelDataAsync(data: RawPixelData, allowGpu: Boolean?): Promise<HybridImageSpec> {
-        val bufferCopy = data.buffer.copyIfNotOwner()
+        val bufferCopy = data.buffer.asOwning()
         val dataCopy = RawPixelData(bufferCopy, data.width, data.height, data.pixelFormat)
         return Promise.async { loadFromRawPixelData(dataCopy, allowGpu) }
     }
@@ -111,13 +113,12 @@ class HybridImageFactory: HybridImageFactorySpec() {
     }
 
     override fun loadFromThumbHash(thumbhash: ArrayBuffer): HybridImageSpec {
-        // copyIfNeeded can be false since we are running this synchronously
         val bytes = thumbhash.toByteArray()
         return loadFromThumbHash(bytes)
     }
 
     override fun loadFromThumbHashAsync(thumbhash: ArrayBuffer): Promise<HybridImageSpec> {
-        // copyIfNeeded needs to be true since we switch threads
+        // We need to copy before jumping Threads
         val bytes = thumbhash.toByteArray()
         return Promise.async { loadFromThumbHash(bytes) }
     }

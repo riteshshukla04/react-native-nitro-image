@@ -1,18 +1,24 @@
 {
-    "$schema": "https://nitro.margelo.com/nitro.schema.json",
-    "cxxNamespace": ["web", "image"],
-    "ios": {
-        "iosModuleName": "NitroWebImage"
-    },
-    "android": {
-        "androidNamespace": ["web", "image"],
-        "androidCxxLibName": "NitroWebImage"
-    },
-    "autolinking": {
-        "WebImageFactory": {
-            "swift": "HybridWebImageFactory",
-            "kotlin": "HybridWebImageFactory"
-        }
-    },
-    "ignorePaths": ["**/node_modules"]
+  "$schema": "https://nitro.margelo.com/nitro.schema.json",
+  "cxxNamespace": ["web", "image"],
+  "ios": {
+    "iosModuleName": "NitroWebImage"
+  },
+  "android": {
+    "androidNamespace": ["web", "image"],
+    "androidCxxLibName": "NitroWebImage"
+  },
+  "autolinking": {
+    "WebImageFactory": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridWebImageFactory"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "HybridWebImageFactory"
+      }
+    }
+  },
+  "ignorePaths": ["**/node_modules"]
 }
